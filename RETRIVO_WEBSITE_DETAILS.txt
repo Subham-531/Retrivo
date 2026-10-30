@@ -1,0 +1,449 @@
+================================================================================
+RETRIVO v2.0 — SMART CAMPUS LOST & FOUND MATCHER
+FULL-STACK DBMS PROJECT SPECIFICATION & SYSTEM REFERENCE
+================================================================================
+
+1. PROJECT OVERVIEW
+--------------------------------------------------------------------------------
+Project Title   : Retrivo: Smart Lost & Found Matcher for College Campuses
+Version         : 2.0 (University Property Office Counter Edition)
+Academic Domain : Database Management Systems (DBMS) Full-Stack Laboratory Project
+Core Problem    : On university campuses, thousands of valuable personal items
+                  (chargers, student IDs, keys, headphones, calculators, flasks)
+                  are misplaced each semester. Traditional physical lost-and-found
+                  desks are unsearchable, fragmented across departments, and expose
+                  belongings to opportunistic theft.
+Solution        : A unified digital recovery platform with a transparent, rule-based
+                  5-point compatibility scoring algorithm, encrypted ownership
+                  verification, 3NF relational database schema, ACID transaction
+                  recovery logging, and an interactive admin moderation desk.
+
+Visual Metaphor : 1970s University Property Office Counter — the lost-and-found
+                  bureau in the student union basement with a ledger register, brass
+                  bell, rubber date stamps, and wooden card catalog drawers.
+
+
+2. TECHNOLOGY STACK
+--------------------------------------------------------------------------------
+Backend Framework       : Java 21 LTS, Spring Boot 3.3.4
+Persistence / ORM       : Spring Data JPA, Hibernate 6.5
+Database Engine         : MySQL 8.0 Server (InnoDB Storage Engine, utf8mb4 collation)
+Security & Auth         : Spring Security 6, BCrypt Password Hashing, Stateless JWT
+Frontend Architecture   : Vanilla HTML5, Modern CSS3 (CSS Grid & Flexbox), ES6+ JavaScript
+Typography System       : Google Fonts (Fraunces Display, Newsreader Body, JetBrains Mono, Inter)
+Iconography             : Lucide Icons (Line-drawn SVG icons, zero emojis)
+Data Visualizations     : Chart.js 4.x (Restyled to Property Office oxblood/moss/brass palette)
+Build & Package Tool    : Apache Maven 3.9 / Executable Standalone Fat JAR
+Local Server URL        : http://localhost:8080/
+
+
+3. DATABASE ARCHITECTURE & DBMS VIVA CONCEPTS
+--------------------------------------------------------------------------------
+The database ('retrivo_db') is fully normalized up to Third Normal Form (3NF),
+enforcing referential integrity, constraints, and audit logging.
+
+3.1 Relational Tables (7 Core Entities):
+  1. users:
+     - Stores student and administrator accounts.
+     - Columns: id (PK), full_name, email (UNIQUE), password_hash (BCrypt),
+       role (ENUM: 'STUDENT', 'ADMIN'), phone, created_at.
+     - Constraints: CHECK (email LIKE '%@%._%').
+
+  2. categories:
+     - Master taxonomy for categorizing campus belongings.
+     - Columns: id (PK), name (UNIQUE), description, icon.
+     - 8 Pre-seeded Categories: Electronics & Gadgets, Bags & Wallets,
+       Books & Stationery, Keys & Access Cards, Clothing & Accessories,
+       ID Cards & Documents, Water Bottles & Flasks, Other Personal Items.
+
+  3. items:
+     - Stores LOST and FOUND reports submitted by campus members.
+     - Columns: id (PK), user_id (FK -> users.id), category_id (FK -> categories.id),
+       item_name, colour, brand, description, location, event_date,
+       report_type (ENUM: 'LOST', 'FOUND'), status (ENUM: 'ACTIVE',
+       'CLAIM_PENDING', 'RETURNED', 'CLOSED'), image_path, identifying_details,
+       created_at, updated_at.
+     - Privacy Rule: 'identifying_details' stores private ownership marks and is
+       never displayed publicly.
+
+  4. matches:
+     - Stores calculated compatibility between compatible report pairs (LOST vs FOUND).
+     - Columns: id (PK), lost_item_id (FK -> items.id), found_item_id (FK -> items.id),
+       compatibility_score (INT, 0-100), matching_reasons (JSON),
+       status (ENUM: 'SUGGESTED', 'NOTIFIED', 'CLAIMED', 'RESOLVED', 'DISMISSED'),
+       created_at.
+     - Constraints: UNIQUE(lost_item_id, found_item_id),
+       CHECK(lost_item_id <> found_item_id).
+
+  5. claims:
+     - Stores claimant ownership proofs and verification decisions.
+     - Columns: id (PK), match_id (FK -> matches.id), claimant_id (FK -> users.id),
+       found_item_id (FK -> items.id), proof_message (TEXT),
+       status (ENUM: 'PENDING', 'APPROVED', 'REJECTED', 'COMPLETED'),
+       reviewed_by (FK -> users.id), review_notes, created_at, reviewed_at.
+
+  6. claim_messages:
+     - Real-time direct communication between claimant and finder to coordinate proof and pickup.
+     - Columns: id (PK), claim_id (FK -> claims.id ON DELETE CASCADE),
+       sender_id (FK -> users.id ON DELETE CASCADE), content (TEXT),
+       is_read (BOOLEAN DEFAULT FALSE), created_at (TIMESTAMP).
+     - Constraints: INDEX(claim_id), INDEX(created_at).
+     - Security: Restricted strictly to the claimant, finder, lost-item owner, or Role.ADMIN.
+
+  7. notifications:
+     - In-app notification center for automated match alerts, claim decisions, and new chat messages.
+     - Columns: id (PK), user_id (FK -> users.id), title, message,
+       type (ENUM: 'MATCH_ALERT', 'CLAIM_SUBMITTED', 'CLAIM_APPROVED',
+       'CLAIM_REJECTED', 'HANDOVER_COMPLETED'), is_read (BOOLEAN), created_at.
+
+  8. item_history:
+     - Comprehensive audit trail of item lifecycle status changes.
+     - Columns: id (PK), item_id (FK -> items.id), old_status, new_status,
+       changed_by_user_id (FK -> users.id), notes, changed_at.
+
+3.2 Relational Views (4 Pre-Compiled Views):
+  - vw_active_reports:
+    Active lost and found items joined with category and user contact info.
+  - vw_high_confidence_matches:
+    Match pairs with score >= 80% with lost and found item titles and reporters.
+  - vw_category_loss_statistics:
+    Total reports, recovered count, and recovery rate percentage grouped by category.
+  - vw_pending_claims_detail:
+    Pending claims with claimant and finder contact info and item locations.
+
+3.3 ACID Transactions & Decoupled Claim/Handover Lifecycle:
+  - Two-Stage Verification & Handover Protocol:
+    1. Claim Submission:
+       - Claimant submits proof of ownership against a matched found report.
+       - Claim created with status = 'PENDING'.
+       - Items transitioned to status = 'CLAIM_PENDING'. Match set to 'CLAIMED'.
+       - Notification dispatched to finder.
+    2. Claim Approval (Verification Stage):
+       - Finder or Administrator verifies claimant's statement.
+       - Claim status updated to 'APPROVED' with reviewed_at timestamp.
+       - Crucial Property Office Rule: Items remain 'CLAIM_PENDING' (NOT prematurely RETURNED).
+       - Claimant is notified to coordinate physical recovery at the campus Property Office.
+    3. Physical Handover Confirmation (Recovery Stage):
+       - Confirmed by finder, claimant, or administrator via /api/claims/{id}/complete.
+       - Claim status becomes 'COMPLETED'.
+       - Both lost and found items transitioned atomically to 'RETURNED'.
+       - Match transitioned to 'RESOLVED'.
+       - Any competing pending claims on the same found item are automatically rejected.
+       - Item history records generated and in-app notifications dispatched to both parties.
+       - All changes executed in a single atomic ACID transaction.
+
+
+4. SMART 5-POINT RULE-BASED MATCHING ENGINE
+--------------------------------------------------------------------------------
+The matching algorithm in 'MatchingService.java' evaluates compatible report pairs
+(LOST vs FOUND) across 5 weighted criteria for a maximum score of 100 points:
+
+  1. Category Match (30 Points Max):
+     - Exact Match (30 pts): lost.category_id = found.category_id.
+     - No Match (0 pts): Reports with different categories are incompatible.
+
+  2. Colour Match (20 Points Max):
+     - Exact Match (20 pts): Primary colour names match case-insensitively.
+     - Partial Overlap (12 pts): One colour string contains the other (e.g. "Dark Blue" vs "Blue").
+
+  3. Location / Campus Facility Proximity (20 Points Max):
+     - Exact Match (20 pts): Reported at identical location (e.g. "Library 2nd Floor").
+     - Facility Proximity Zone (16 pts): Items reported within the same campus
+       zone (e.g. both in "Library", "CS Computer Lab", "Main Cafeteria", "Sports Complex").
+
+  4. Date Proximity Timeline (16 Points Max):
+     - Same Day (16 pts): Found on the exact date lost.
+     - Within 24 Hours (14 pts): Found 1 day after loss.
+     - Within 48 Hours (12 pts): Found 2 days after loss.
+     - Within 5 Days (8 pts): Found within 5 days.
+     - Within 10 Days (4 pts): Found within 10 days.
+     - Negative Timeline: If found date is before lost date by >2 days, penalized to 0 pts.
+
+  5. Title & Description Keyword Overlap (14 Points Max):
+     - Brand Match (+6 pts): Identical brand (e.g. "Apple", "HP", "Milton", "Casio").
+     - Tokenized Jaccard Similarity (+8 pts): Token overlap of normalized keywords.
+
+Compatibility Tiers:
+  - Strong Match (>= 80 Points) : Automatically triggers in-app notification alerts to both students.
+  - Possible Match (50 - 79 Points) : Recommended in student portal smart match feed.
+  - Low Match (< 50 Points) : Filtered out to prevent notification noise.
+
+
+5. USER ROLES & ACCESS CONTROL
+--------------------------------------------------------------------------------
+Retrivo implements Role-Based Access Control (RBAC) via Spring Security:
+
+5.1 Student Role ('ROLE_STUDENT'):
+  - File LOST and FOUND reports with public descriptions and private verification details.
+  - Search and filter campus reports in the card catalog.
+  - Access personal Student Ledger (active reports, match suggestions, submitted claims).
+  - File ownership claims on matched found items with proof statements.
+  - Approve or reject claims submitted on items they found.
+  - Receive real-time notification alerts.
+
+5.2 Admin Role ('ROLE_ADMIN'):
+  - Access the Property Office Admin Moderation Desk.
+  - View real-time campus KPI analytics (users, reports, recoveries, calculated matches, recovery rate).
+  - Interactive Chart.js analytics: monthly reporting vs. recovery trends & category distribution doughnut.
+  - Content moderation: override status of any campus report (ACTIVE, CLAIM_PENDING, RETURNED, CLOSED).
+  - Administrative deletion of duplicate, spam, or inappropriate reports.
+  - Directory oversight of all registered campus users.
+
+5.3 Pre-Seeded Demo Accounts for Presentation:
+  -----------------------------------------------------------------------------
+  Role     | Name                         | Email                   | Password
+  -----------------------------------------------------------------------------
+  ADMIN    | Campus Security Admin        | admin@retrivo.campus.edu | Admin@123
+  STUDENT  | Suyash Kaistha               | suyash@campus.edu       | Student@123
+  STUDENT  | Aarav Sharma                 | aarav@campus.edu        | Student@123
+  STUDENT  | Ananya Verma                 | ananya@campus.edu       | Student@123
+  STUDENT  | Rohan Mehta                  | rohan@campus.edu        | Student@123
+  STUDENT  | Priya Patel                  | priya@campus.edu        | Student@123
+  -----------------------------------------------------------------------------
+  *(Tip: Login dialog features one-click demo buttons that auto-fill credentials instantly)*
+
+
+6. UI/UX DESIGN SYSTEM — PROPERTY OFFICE METAPHOR
+--------------------------------------------------------------------------------
+Retrivo v2.0 adheres to a strict "University Property Office Counter" design system:
+
+6.1 Color Palette Tokens:
+  - Paper Surfaces:
+    --paper-50  : #FBF7EE (Lightest paper highlight)
+    --paper-100 : #F5F0E6 (Primary parchment background)
+    --paper-200 : #EDE5D2 (Raised surfaces, cards, filters)
+    --paper-300 : #E0D5BC (Card borders, table headers)
+    --paper-400 : #C9B997 (Dividers, outlines)
+    --paper-500 : #8B6F47 (Sepia accent)
+  - Ink System:
+    --ink-900   : #1A1612 (Deep warm charcoal for primary text and dark surfaces)
+    --ink-700   : #2E2620 (Headings on light paper)
+    --ink-500   : #5A4A3A (Secondary body text)
+    --ink-300   : #8B7A66 (Hints, timestamps, captions)
+  - Stamps & Accents:
+    --stamp-700 : #4A1F1F (Deep pressed oxblood)
+    --stamp-500 : #6B2C2C (Primary CTA, LOST stamp)
+    --stamp-300 : #A85959 (Hover oxblood)
+    --moss-500  : #5B6E3A (FOUND stamp, success, recovered items)
+    --brass-500 : #B87333 (Desk bell, active inputs, CLAIM_PENDING)
+    --sepia-500 : #8B6F47 (ACTIVE status stamp, tags)
+    --rust-500  : #B5462C (Destructive alerts, delete buttons)
+
+6.2 Typography Tokens:
+  - Display Headings : "Fraunces", high-contrast serif with optical sizing.
+  - Body Copy        : "Newsreader", workhorse literary serif.
+  - Numbers & IDs    : "JetBrains Mono", fixed-width numerals for report IDs, scores, dates.
+  - UI Labels & CTAs : "Inter", clean sans-serif for buttons, inputs, and navigation.
+
+6.3 Design Rules & Non-Negotiables:
+  - Zero Blue / Purple : No indigo, blue, violet, or AI sunset gradients anywhere.
+  - Zero Emojis        : Replaced with line-drawn SVG Lucide icons (MapPin, Calendar, Bell, Stamp, ShieldCheck).
+  - Strict 4px Scale   : Every padding, margin, and gap is a multiple of 4 (4, 8, 12, 16, 20, 24, 32, 40, 48, 64px).
+  - Rubber Stamps      : Status badges render as rotated ink-stamp impressions (-2.5deg / +2deg) with dashed borders.
+  - Tactile Depth      : Buttons feature physical press states (translateY +1px, inset shadow).
+
+
+7. SCREEN-BY-SCREEN APPLICATION WALKTHROUGH
+--------------------------------------------------------------------------------
+1. Home View (#home):
+   - Hero Section: University Property Office Counter introduction with primary
+     "Report Lost Item" (oxblood), "Report Found Item" (moss), and "Browse Reports" CTAs.
+   - Quick Catalog Search: Search input with brass focus ring.
+   - Desk Registry Slip Graphic: Visual preview showing an intake slip with points breakdown.
+   - Single-Row Ledger Stats Band: 4 cells (Total Reports Filed, Items Safely Recovered,
+     Algorithmic Matches, Registered Students) separated by 1px dividers.
+   - 3-Step Protocol: Drop-cap numerals (01 Report with Attributes, 02 5-Point Match Engine,
+     03 Verify & Recover).
+   - 5-Point Scoring Callout Band: Full-width charcoal card illustrating the 100-point formula.
+   - Live Desk Intake: Grid of recently reported belongings with direct card catalog links.
+
+2. Card Catalog / Browse View (#browse):
+   - Header with "Property Office · Card Catalog" eyebrow.
+   - Segmented Tabs: "All Items", "Lost Items", "Found Items" with tactile pressed-in active state.
+   - Multi-Filter Toolbar: Keyword search, category select, colour select, facility filter,
+     status select, and reset button.
+   - Card Catalog Grid: Physical card representations featuring rubber stamps, category tags,
+     item titles, description excerpts, facility/date metadata, and report numbers (#01, #02).
+
+3. Student Portal / My Ledger (#dashboard):
+   - Personalized student welcome header ("Student Portal, Suyash Kaistha").
+   - 5-Metric Ledger Band: Active Lost, Active Found, Recovered, Potential Matches, Pending Claims.
+   - Action Toolbar: Quick buttons for reporting items, reviewing matches, and tracking claims.
+   - "My Submitted Reports" Ledger Table: Zebra-striped table listing student's reports with
+     actions to view details, inspect algorithmic matches, or delete.
+
+4. Intake Slip / Report Form View (#report):
+   - Clerk's Intake Slip card with Lost/Found segmented toggle.
+   - Structured Form Fields: Title, Category, Primary Colour, Brand, Event Date, Campus Facility.
+   - Quick Facility Chips: One-click campus location selectors (Library 2nd Floor, CS Lab B,
+     Main Cafeteria, Lecture Hall 102, Sports Complex, Hostel Block C).
+   - Secret Verification Detail Panel: Inset panel with brass border and ShieldCheck icon
+     explaining that private markings (serial numbers, engraving, wallpapers) remain hidden
+     from the public and are used exclusively to verify ownership claims.
+   - Optional Photo Upload: 5MB dropzone supporting JPG, PNG, and WEBP.
+
+5. Smart Matches Feed (#matches):
+   - Header explaining the transparent 5-point scoring algorithm.
+   - Match Cards: Side-by-side comparison between the Lost Report and Found Report.
+   - Circular Brass Score Stamp: Embossed double-bordered circle displaying compatibility % (/100).
+   - 5-Point Checklist Breakdown: Visual line-item breakdown (+30 Category, +20 Colour,
+     +20 Facility, +16 Timeline, +14 Keywords) showing exactly why the algorithm matched them.
+   - "Claim This Item" Action: Triggers the human verification workflow.
+
+6. Ownership Claims Center (#claims):
+   - Manage incoming claims on found items and outgoing claims on lost items.
+   - Displays claimant verification statements, submission timestamps, and finder names.
+   - Finder Decision Actions: "Approve Claim" (triggers atomic ACID transaction marking item RETURNED)
+     or "Reject Claim" with reason prompt.
+   - Post-approval "Mark as Handed Over" button confirming physical handover on campus.
+
+7. Admin Moderation Desk (#admin):
+   - Real-time KPI Ledger Band: Total Users, Lost Reports, Found Reports, Recoveries.
+   - Secondary Engine Performance Band: Computed Matches, Pending Claims, Campus Recovery Rate.
+   - Interactive Chart.js Visualizations:
+     * Line chart: Monthly Reporting vs. Recovery Trends.
+     * Doughnut chart: Campus reports distributed by item category.
+   - Campus Report Moderation Table: Full database table with status override dropdown and
+     administrative deletion.
+   - Registered Campus Users Directory: User ID, full name, email, role, registration date.
+   - DBMS Viva Reference Cards: Direct shortcuts to ER Diagram & 3NF proof, Important SQL Queries,
+     ACID Transactions, and Relational Views.
+
+8. Modals & Dialogs:
+   - Login Modal: Email and password fields with One-Click Demo Account buttons for instant grading.
+   - Register Modal: Account creation form with name, university email, phone, and password.
+   - Catalog Entry Details Modal: Complete report dossier including status stamps and private notes.
+   - Claim Verification Modal: Submit proof statement with unique identifying marks.
+   - Direct Verification Chat Modal (Property Office Dispatch): Live in-app messenger enabling
+     the claimant and the finder to directly chat, clarify identifying marks, agree on pickup time,
+     and coordinate physical handover at the Property Office. Includes quick prompt buttons,
+     instant auto-scroll, unread tracking, and 3-second live polling.
+   - Desk Notifications Dropdown: Interactive bell alerts for match leads and claim status updates.
+
+
+8. REST API SPECIFICATION
+--------------------------------------------------------------------------------
+Base URL: http://localhost:8080/api
+
+Authentication Endpoints:
+  POST   /api/auth/login                  - Authenticate user, returns JWT token & role
+  POST   /api/auth/register               - Register new student account
+
+Item & Catalog Endpoints:
+  GET    /api/items/browse                - Filter & search catalog (query, category, colour, status, page, size)
+  GET    /api/items/{id}                  - Retrieve detailed item report
+  GET    /api/items/recent                - Retrieve 6 most recent active campus reports
+  GET    /api/items/my-items              - Retrieve reports submitted by authenticated user
+  POST   /api/items                       - Submit new lost or found report (requires auth)
+  POST   /api/items/upload-image          - Upload item photograph (multipart, max 5MB)
+  DELETE /api/items/{id}                  - Delete own report
+
+Smart Match Endpoints:
+  GET    /api/matches                     - Retrieve algorithmic matches relevant to authenticated user
+  GET    /api/matches/item/{itemId}       - Retrieve matches for a specific item report
+  GET    /api/matches/all                 - Retrieve all system matches above threshold
+
+Claims Endpoints:
+  POST   /api/claims                      - Submit ownership claim with proof statement
+  GET    /api/claims/my                   - Retrieve claims relevant to authenticated user
+  GET    /api/claims/{id}                 - Retrieve claim details (claimant, finder, or admin)
+  GET    /api/claims/{id}/messages        - Retrieve direct chat history between claimant & finder
+  POST   /api/claims/{id}/messages        - Send real-time chat message to counterpart
+  PUT    /api/claims/{id}/review          - Approve or reject a claim (finder / admin)
+  PUT    /api/claims/{id}/complete        - Confirm physical belongings handover
+
+Category Endpoints:
+  GET    /api/categories                  - Retrieve master category taxonomy list
+
+Admin Endpoints (Requires ROLE_ADMIN):
+  GET    /api/admin/stats                 - Retrieve campus KPIs, category distribution & trends
+  GET    /api/admin/items                 - Retrieve all items across campus for moderation
+  GET    /api/admin/users                 - Retrieve registered campus student directory
+  PATCH  /api/admin/items/{id}/status     - Override status of any campus report
+  DELETE /api/admin/items/{id}            - Permanently delete a report
+
+Notification Endpoints:
+  GET    /api/notifications               - Retrieve in-app notifications
+  GET    /api/notifications/unread-count  - Retrieve unread notification badge count
+  PATCH  /api/notifications/mark-all-read - Mark all alerts as read
+
+
+9. HOW TO RUN IN LOCALHOST
+--------------------------------------------------------------------------------
+Requirements:
+  - macOS, Linux, or Windows
+  - Java 21 LTS installed
+  - MySQL 8.0 Server running on port 3306 with user 'root'
+
+One-Click Launch (macOS / Linux):
+  $ ./run.sh
+
+Manual Launch:
+  $ java -Dserver.port=8080 -jar backend/target/retrivo-backend-1.0.0.jar \
+      --spring.datasource.url="jdbc:mysql://localhost:3306/retrivo_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+      --spring.datasource.username=root \
+      --spring.datasource.password=subham123
+
+Access Application in Web Browser:
+  http://localhost:8080/
+
+
+10. AUTOMATED TEST SUITE & VERIFICATION
+--------------------------------------------------------------------------------
+Retrivo v2.0 includes a comprehensive automated JUnit 5 / Mockito unit and integration
+test suite located under 'backend/src/test/java/edu/campus/retrivo/service/':
+
+10.1 MatchingServiceTest (5 Unit Tests):
+  - testExactMatchAllCriteria:
+    Verifies that a 100% identical report pair achieves the maximum 100 points
+    with all 5 breakdown reasons generated.
+  - testCategoryMismatch:
+    Confirms that items in mismatched categories receive 0 category points and
+    generate an explicit mismatch reason without producing false matches.
+  - testDateProximityDegradation:
+    Verifies timeline scoring progression (same day = 16 pts > 1 day = 14 pts >
+    4 days = 8 pts > 15 days = 0 pts).
+  - testFoundBeforeLostDate:
+    Enforces the physical constraint that an item found days before it was lost
+    is awarded 0 date proximity points.
+  - testCampusZoneMatching:
+    Verifies facility zone matching (e.g., Library reading room vs. basement)
+    receives 16 points for proximity.
+
+10.2 ClaimServiceTest (7 Unit Tests):
+  - testCreateClaimSuccess:
+    Verifies claim submission transitions item status to CLAIM_PENDING, match to
+    CLAIMED, and creates notifications.
+  - testFinderCannotClaimOwnItem:
+    Ensures a finder cannot submit a claim against their own found report.
+  - testReviewClaimApprovalDecoupledFromReturn:
+    CRITICAL: Confirms that claim approval transitions claim to APPROVED while
+    items strictly remain CLAIM_PENDING (awaiting physical handover).
+  - testUnauthorizedClaimReview:
+    Verifies that third-party students cannot approve or reject claims.
+  - testMarkCompletedSuccess:
+    Verifies physical handover completion transitions claim to COMPLETED, items
+    to RETURNED, and match to RESOLVED in an atomic update.
+  - testMarkCompletedAutoRejectsCompetingClaims:
+    Ensures that confirming handover automatically invalidates and rejects any
+    other competing pending claims on the same found item.
+  - testUnauthorizedHandoverCompletion:
+    Ensures only the finder, claimant, or administrator can confirm recovery.
+
+10.3 Test Execution Command:
+  $ CP="backend/target/classes:backend/target/test-classes:$(find /tmp/m2_repo -name '*.jar' | tr '\n' ':')"
+  $ java -javaagent:/tmp/m2_repo/net/bytebuddy/byte-buddy-agent/1.14.19/byte-buddy-agent-1.14.19.jar \
+      -cp "$CP" edu.campus.retrivo.TestRunner
+
+Result: 12/12 Tests Passing (0 Failures, 100% Pass Rate).
+================================================================================
+      --spring.datasource.username=root \
+      --spring.datasource.password=subham123
+
+Access Web Application:
+  Open browser and visit: http://localhost:8080/
+
+================================================================================
+END OF SPECIFICATION — RETRIVO CAMPUS PROPERTY OFFICE PLATFORM
+================================================================================
+

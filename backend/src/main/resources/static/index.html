@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrivo — Campus Property Office &amp; Smart Lost &amp; Found</title>
+    
+    <!-- Favicon: Retrivo Retrieval Beacon Emblem -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%238B263E'/%3E%3Ccircle cx='16' cy='16' r='12' stroke='%23D4AF37' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='16' y1='3' x2='16' y2='6' stroke='%23D4AF37' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='16' y1='26' x2='16' y2='29' stroke='%23D4AF37' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='3' y1='16' x2='6' y2='16' stroke='%23D4AF37' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='26' y1='16' x2='29' y2='16' stroke='%23D4AF37' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M12 22V10h4.5a3 3 0 0 1 0 6H12' stroke='%23FDFBF7' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M15.5 16L20 22' stroke='%23FDFBF7' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='13' r='1.2' fill='%23D4AF37'/%3E%3C/svg%3E">
+    <link rel="alternate icon" href="favicon.ico">
+
+    <!-- Google Fonts: Fraunces, Newsreader, JetBrains Mono, Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;700;900&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js for Admin Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Immediate Theme Application (Prevents White Flash) -->
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('retrivo_theme');
+                var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (systemDark ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        })();
+    </script>
+
+    <!-- Property Office Design System Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ==================== NAVIGATION BAR ==================== -->
+    <header class="navbar">
+        <div class="nav-container">
+            <!-- Brand Logo Lockup -->
+            <div class="brand-logo" onclick="App.navigate('home')">
+                <div class="brand-icon-wrap">
+                    <svg class="brand-logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="16" y1="2" x2="16" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="16" y1="27" x2="16" y2="30" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="2" y1="16" x2="5" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="27" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M11.5 22.5V9.5H16.5C18.985 9.5 21 11.515 21 14C21 16.485 18.985 18.5 16.5 18.5H11.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 18.5L21.5 22.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="16" cy="14" r="1.5" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="brand-text-lockup">
+                    <span class="brand-title">Retrivo</span>
+                    <span class="brand-subtitle">Property Office</span>
+                </div>
+            </div>
+
+            <!-- Centered Clean Segmented Navigation Menu -->
+            <nav class="nav-wrapper">
+                <ul class="nav-menu">
+                    <li><button class="nav-item-btn" data-nav="home"><i data-lucide="home"></i> <span>Home</span></button></li>
+                    <li><button class="nav-item-btn" data-nav="browse"><i data-lucide="archive"></i> <span>Browse</span></button></li>
+                    <li><button class="nav-item-btn" data-nav="matches"><i data-lucide="sparkles"></i> <span>Smart Matches</span></button></li>
+                    <li><button class="nav-item-btn" data-nav="claims"><i data-lucide="message-square"></i> <span>Claims &amp; Chat</span></button></li>
+                    <li><button class="nav-item-btn" id="navBtnDashboard" data-nav="dashboard" style="display: none;"><i data-lucide="user"></i> <span>Dashboard</span></button></li>
+                    <li><button class="nav-item-btn" id="navBtnAdmin" data-nav="admin" style="display: none;"><i data-lucide="shield-check"></i> <span>Admin</span></button></li>
+                </ul>
+            </nav>
+
+            <!-- Right Actions Bar -->
+            <div class="nav-actions">
+                <!-- Single Clean Report Action Button -->
+                <button class="btn-report-cta" onclick="App.navigate('report')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+                    <span>Report Item</span>
+                </button>
+
+                <!-- Theme Toggle Button (Light / Dark Archive Mode) -->
+                <button class="theme-toggle-btn" id="themeToggleBtn" onclick="App.toggleTheme()" title="Switch to Dark Mode" aria-label="Toggle dark mode">
+                    <svg class="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    <svg class="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                </button>
+
+                <!-- Notifications Bell -->
+                <div class="notif-wrapper">
+                    <button class="notification-bell-btn" id="notifBellBtn" onclick="App.toggleNotificationsDropdown()" title="Notifications" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                        <span class="bell-badge" id="bellBadge" style="display: none;">0</span>
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <h4>Desk Notifications</h4>
+                            <button class="btn btn-sm btn-subtle" onclick="App.markAllNotificationsRead()" style="font-size: 0.75rem;">Mark All Read</button>
+                        </div>
+                        <div class="notif-list" id="notifDropdownList">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auth Buttons for Guests -->
+                <div id="navAuthActions" class="nav-auth-buttons">
+                    <button class="btn-nav-text" onclick="App.openLoginModal()">Log In</button>
+                    <button class="btn-nav-outline" onclick="App.openRegisterModal()">Register</button>
+                </div>
+
+                <!-- User Profile Pill for Logged-In Users -->
+                <div id="navUserProfile" class="user-profile-chip" style="display: none;">
+                    <div class="user-avatar-circle" id="navUserInitial">S</div>
+                    <div class="user-chip-text">
+                        <span class="user-chip-name" id="navUserName">Student</span>
+                        <span class="user-chip-role" id="navUserRole">STUDENT</span>
+                    </div>
+                    <button class="btn-chip-logout" onclick="App.handleLogout()" title="Log Out" aria-label="Log Out">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-wrapper">
+
+        <!-- ---------------------------------------------------- -->
+        <!-- VIEW 1: HOME (PROPERTY OFFICE COUNTER) -->
+        <!-- ---------------------------------------------------- -->
+        <section id="view-home" class="view-section active">
+            <!-- Hero Card: Clean, Modern, Purposeful -->
+            <div class="hero-card" id="heroStage">
+                <div class="hero-content">
+                    <div class="hero-tag">
+                        <i data-lucide="shield-check" style="width: 14px;"></i> Campus Lost &amp; Found
+                    </div>
+                    <h1 class="hero-title">
+                        Lost Something?<br><span>Let's get it back.</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Retrivo connects students who misplaced belongings with finders across campus using a transparent 5-point matching algorithm and direct secure chat.
+                    </p>
+
+                    <!-- Prominent Clean Search Bar -->
+                    <div class="hero-search-box">
+                        <i data-lucide="search" class="hero-search-icon"></i>
+                        <input type="text" id="heroSearchInput" class="hero-search-input" placeholder="Search by item, brand, or facility (e.g. 'AirPods', 'Casio', 'Library')..." onkeypress="if(event.key==='Enter') App.navigate('browse', { query: this.value })">
+                        <button class="btn btn-primary" onclick="App.navigate('browse', { query: document.getElementById('heroSearchInput').value })">
+                            Search
+                        </button>
+                    </div>
+
+                    <!-- Clean Quick Actions -->
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="App.navigate('report', { type: 'LOST' })">
+                            <i data-lucide="search" style="width: 15px;"></i> Report Lost Item
+                        </button>
+                        <button class="btn btn-teal" onclick="App.navigate('report', { type: 'FOUND' })">
+                            <i data-lucide="plus" style="width: 15px;"></i> Report Found Item
+                        </button>
+                        <button class="btn btn-outline" onclick="App.navigate('browse')">
+                            <i data-lucide="archive" style="width: 15px;"></i> Browse All Items &rarr;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Clean 3-Step Process Card -->
+                <div class="hero-process-card">
+                    <div class="process-card-header">
+                        <div class="process-card-badge">
+                            <i data-lucide="sparkles" style="width: 14px;"></i> 3-Step Recovery
+                        </div>
+                        <span class="process-card-rate">94% Match Success</span>
+                    </div>
+
+                    <div class="process-steps-list">
+                        <div class="process-step">
+                            <div class="process-step-num">1</div>
+                            <div class="process-step-content">
+                                <strong>Log Belonging</strong>
+                                <p>Report with facility, colour, and a secret verification mark.</p>
+                            </div>
+                        </div>
+
+                        <div class="process-step">
+                            <div class="process-step-num">2</div>
+                            <div class="process-step-content">
+                                <strong>Algorithmic Score</strong>
+                                <p>5-point engine pairs lost and found reports out of 100 points.</p>
+                            </div>
+                        </div>
+
+                        <div class="process-step">
+                            <div class="process-step-num">3</div>
+                            <div class="process-step-content">
+                                <strong>Direct Chat &amp; Handover</strong>
+                                <p>Chat in-app to verify proof and meet safely at the Property Office.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="process-card-footer">
+                        <button class="btn btn-outline btn-sm" onclick="App.navigate('matches')" style="width: 100%; justify-content: center;">
+                            <i data-lucide="sparkles" style="width: 14px;"></i> View Current Matches &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ledger Stats Band (Single Row, Ledger Style) -->
+            <div class="stats-grid reveal-on-scroll">
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-indigo">
+                        <i data-lucide="file-text" style="width: 22px;"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value" id="statTotalReports">12</div>
+                        <div class="stat-label">Total Reports Filed</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-emerald">
+                        <i data-lucide="check-check" style="width: 22px;"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value" id="statTotalRecovered">2</div>
+                        <div class="stat-label">Items Safely Recovered</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-teal">
+                        <i data-lucide="sparkles" style="width: 22px;"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value" id="statTotalMatches">5</div>
+                        <div class="stat-label">Algorithmic Matches</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-amber">
+                        <i data-lucide="users" style="width: 22px;"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value" id="statTotalStudents">6</div>
+                        <div class="stat-label">Registered Students</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works Section with Drop-Cap Numerals -->
+            <div class="section-header reveal-on-scroll">
+                <div class="section-tag">Property Office Protocol</div>
+                <h2 class="section-title">How Retrivo Works in 3 Steps</h2>
+                <p class="section-desc">A transparent, human-verified protocol designed to protect student belongings from opportunistic theft.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card reveal-on-scroll reveal-delay-1">
+                    <div class="step-number">01</div>
+                    <div class="step-icon-wrap">
+                        <i data-lucide="file-plus" style="width: 22px;"></i>
+                    </div>
+                    <h3 class="step-title">Report with Attributes</h3>
+                    <p class="step-desc">Log your lost or found item with exact category, colour, campus facility, date, and a secret identifying mark for ownership verification.</p>
+                </div>
+                <div class="step-card reveal-on-scroll reveal-delay-2">
+                    <div class="step-number">02</div>
+                    <div class="step-icon-wrap">
+                        <i data-lucide="cpu" style="width: 22px;"></i>
+                    </div>
+                    <h3 class="step-title">5-Point Match Engine</h3>
+                    <p class="step-desc">Our backend matching engine scores report pairs out of 100 points based on category (+30), colour (+20), location (+20), date (+16), and keywords (+14).</p>
+                </div>
+                <div class="step-card reveal-on-scroll reveal-delay-3">
+                    <div class="step-number">03</div>
+                    <div class="step-icon-wrap">
+                        <i data-lucide="shield-check" style="width: 22px;"></i>
+                    </div>
+                    <h3 class="step-title">Verify &amp; Recover</h3>
+                    <p class="step-desc">The claimant proves ownership through secret details. Once verified by the finder or clerk, coordinate a safe handover on campus.</p>
+                </div>
+            </div>
+
+            <!-- Scoring Callout Band (Charcoal ink-900) -->
+            <div class="scoring-callout-band reveal-on-scroll">
+                <h3>No black box. Five attributes. Maximum 100 points.</h3>
+                <p>Every match compatibility percentage is computed transparently using strict database relational queries and multi-parameter weighting.</p>
+                
+                <div class="scoring-breakdown-row">
+                    <div class="score-attribute-card">
+                        <div class="score-attribute-points">+30</div>
+                        <div class="score-attribute-label">Category Match</div>
+                        <div class="score-attribute-rule">lost.category_id = found.category_id</div>
+                    </div>
+                    <div class="score-attribute-card">
+                        <div class="score-attribute-points">+20</div>
+                        <div class="score-attribute-label">Colour Match</div>
+                        <div class="score-attribute-rule">Exact shade or partial overlap</div>
+                    </div>
+                    <div class="score-attribute-card">
+                        <div class="score-attribute-points">+20</div>
+                        <div class="score-attribute-label">Campus Facility</div>
+                        <div class="score-attribute-rule">Same facility or proximity zone</div>
+                    </div>
+                    <div class="score-attribute-card">
+                        <div class="score-attribute-points">+16</div>
+                        <div class="score-attribute-label">Date Proximity</div>
+                        <div class="score-attribute-rule">Within same day to 48 hours</div>
+                    </div>
+                    <div class="score-attribute-card">
+                        <div class="score-attribute-points">+14</div>
+                        <div class="score-attribute-label">Keyword Overlap</div>
+                        <div class="score-attribute-rule">Brand and description tokens</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recently Reported Belongings -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+                <div>
+                    <div class="section-tag" style="text-align: left;">Live Desk Intake</div>
+                    <h3 style="font-size: 24px; font-weight: 800; color: var(--ink-900);">Recently Reported Belongings</h3>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="App.navigate('browse')">View Full Card Catalog &rarr;</button>
+            </div>
+
+            <div class="items-grid" id="recentItemsGrid">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- VIEW 2: BROWSE & CARD CATALOG -->
+        <!-- ---------------------------------------------------- -->
+        <section id="view-browse" class="view-section">
+            <div style="margin-bottom: 32px;">
+                <div class="section-tag" style="text-align: left;">Property Office · Card Catalog</div>
+                <h2 style="font-size: 32px; font-weight: 800; color: var(--ink-900); margin-bottom: 8px;">Browse Campus Reports</h2>
+                <p style="color: var(--ink-500); font-size: 16px;">Filter and search through every lost and found report filed on campus with live database queries.</p>
+            </div>
+
+            <!-- Filters & Search Toolbar -->
+            <div class="filters-bar">
+                <div class="filters-main-row">
+                    <!-- Search Input with Icon -->
+                    <div class="filters-search-wrap">
+                        <i data-lucide="search" class="filter-search-icon"></i>
+                        <input type="text" id="browseSearchInput" class="filters-search-input" placeholder="Search items by keywords, title, or brand..." oninput="App.state.browseParams.query=this.value; App.fetchAndRenderBrowseItems();">
+                    </div>
+
+                    <!-- Segmented Report Type Pills -->
+                    <div class="tabs-group" id="browseTabs">
+                        <button class="tab-btn active" data-tab="" onclick="App.setBrowseTabActive(''); App.state.browseParams.reportType=''; App.fetchAndRenderBrowseItems();">All Items</button>
+                        <button class="tab-btn" data-tab="LOST" onclick="App.setBrowseTabActive('LOST'); App.state.browseParams.reportType='LOST'; App.fetchAndRenderBrowseItems();">Lost Only</button>
+                        <button class="tab-btn" data-tab="FOUND" onclick="App.setBrowseTabActive('FOUND'); App.state.browseParams.reportType='FOUND'; App.fetchAndRenderBrowseItems();">Found Only</button>
+                    </div>
+                </div>
+
+                <!-- Secondary Filter Selectors -->
+                <div class="filters-secondary-row">
+                    <div class="filter-select-group">
+                        <label class="filter-mini-label">Category</label>
+                        <select id="filterCategory" class="form-control form-control-sm" onchange="App.state.browseParams.categoryId=this.value; App.fetchAndRenderBrowseItems();">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-select-group">
+                        <label class="filter-mini-label">Colour</label>
+                        <select id="filterColour" class="form-control form-control-sm" onchange="App.state.browseParams.colour=this.value; App.fetchAndRenderBrowseItems();">
+                            <option value="">All Colours</option>
+                            <option value="Black">Black</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Silver">Silver / Grey</option>
+                            <option value="White">White</option>
+                            <option value="Red">Red</option>
+                            <option value="Brown">Brown</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-select-group" style="flex: 1.2;">
+                        <label class="filter-mini-label">Facility</label>
+                        <input type="text" id="filterLocation" class="form-control form-control-sm" placeholder="e.g. Library, CS Lab..." oninput="App.state.browseParams.location=this.value; App.fetchAndRenderBrowseItems();">
+                    </div>
+
+                    <div class="filter-select-group">
+                        <label class="filter-mini-label">Status</label>
+                        <select id="filterStatus" class="form-control form-control-sm" onchange="App.state.browseParams.status=this.value; App.fetchAndRenderBrowseItems();">
+                            <option value="">All Statuses</option>
+                            <option value="ACTIVE" selected>Active Only</option>
+                            <option value="CLAIM_PENDING">Claim Pending</option>
+                            <option value="RETURNED">Returned</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-outline btn-sm filter-reset-btn" onclick="App.resetBrowseFilters()" title="Reset Filters">
+                        <i data-lucide="rotate-ccw" style="width: 14px;"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card Catalog Grid -->
+            <div class="items-grid" id="browseItemsGrid">
+                <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Pagination Controls -->
+            <div id="browsePagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- VIEW 3: STUDENT PORTAL / MY LEDGER -->
+        <!-- ---------------------------------------------------- -->
+        <section id="view-dashboard" class="view-section">
+            <div style="margin-bottom: 32px;">
+                <div class="section-tag" style="text-align: left;">Property Office · Student Ledger</div>
+                <h2 style="font-size: 32px; font-weight: 800; color: var(--ink-900); margin-bottom: 8px;">
+                    Student Portal, <span id="dashStudentName">Suyash Kaistha</span>
+                </h2>
+                <p style="color: var(--ink-500); font-size: 16px;">Manage your active reports, review algorithmic matches, and verify recovery claims.</p>
+            </div>
+
+            <!-- Ledger Stats Band (5 Metrics) -->
+            <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-indigo"><i data-lucide="search" style="width: 20px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="dashCountLost">0</div>
+                        <div class="stat-label">Lost Reports</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-teal"><i data-lucide="gift" style="width: 20px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="dashCountFound">0</div>
+                        <div class="stat-label">Found Reports</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-emerald"><i data-lucide="check-check" style="width: 20px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="dashCountRecovered">0</div>
+                        <div class="stat-label">Recovered</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: pointer;" onclick="App.navigate('matches')">
+                    <div class="stat-icon-wrap stat-icon-amber"><i data-lucide="sparkles" style="width: 20px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="dashCountMatches">0</div>
+                        <div class="stat-label">Matches</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: pointer;" onclick="App.navigate('claims')">
+                    <div class="stat-icon-wrap stat-icon-indigo"><i data-lucide="file-check" style="width: 20px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="dashCountClaims">0</div>
+                        <div class="stat-label">Claims</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Toolbar -->
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px;">
+                <button class="btn btn-primary" onclick="App.navigate('report', { type: 'LOST' })">
+                    <i data-lucide="plus"></i> Report Lost Item
+                </button>
+                <button class="btn btn-teal" onclick="App.navigate('report', { type: 'FOUND' })">
+                    <i data-lucide="plus"></i> Report Found Item
+                </button>
+                <button class="btn btn-outline" onclick="App.navigate('matches')">
+                    <i data-lucide="sparkles"></i> View Smart Matches
+                </button>
+                <button class="btn btn-outline" onclick="App.navigate('claims')">
+                    <i data-lucide="file-check"></i> Manage Claims
+                </button>
+            </div>
+
+            <!-- My Reports Ledger Table -->
+            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 16px; color: var(--ink-900);">My Submitted Reports</h3>
+            <div id="dashMyReportsList">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- VIEW 4: CLERK INTAKE SLIP (REPORT FORM) -->
+        <!-- ---------------------------------------------------- -->
+        <section id="view-report" class="view-section">
+            <div class="form-card">
+                <!-- Type Selection Tabs -->
+                <div class="tabs-group" id="reportTypeTabs" style="margin-bottom: 24px; width: 100%; display: flex;">
+                    <button class="tab-btn active" data-type="LOST" onclick="App.setReportType('LOST')" style="flex: 1; text-align: center;">
+                        <i data-lucide="search" style="width: 14px; display: inline;"></i> Report Lost Belonging
+                    </button>
+                    <button class="tab-btn" data-type="FOUND" onclick="App.setReportType('FOUND')" style="flex: 1; text-align: center;">
+                        <i data-lucide="plus" style="width: 14px; display: inline;"></i> Report Found Item
+                    </button>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <div class="section-tag" style="text-align: left;">Intake Slip</div>
+                    <h2 id="reportFormTitle" style="font-size: 26px; font-weight: 800; color: var(--ink-900); margin-bottom: 6px;">Report Lost Belonging</h2>
+                    <p id="reportFormSubtitle" style="color: var(--ink-500); font-size: 14px;">Fill in the intake details to trigger the 5-point smart matching algorithm.</p>
+                </div>
+
+                <form id="reportItemForm" onsubmit="App.handleReportFormSubmit(event)">
+                    <input type="hidden" id="reportTypeInput" value="LOST">
+
+                    <div class="form-group">
+                        <label class="form-label">Item Title *</label>
+                        <input type="text" id="reportItemName" class="form-control" placeholder="e.g., HP Pavilion 65W Laptop Charger, Blue Milton Flask" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Category *</label>
+                            <select id="reportCategory" class="form-control" required>
+                                <option value="" disabled selected>Select Category *</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Primary Colour *</label>
+                            <input type="text" id="reportColour" class="form-control" placeholder="e.g., Blue, Black, Matte Silver" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Brand / Manufacturer (Optional)</label>
+                            <input type="text" id="reportBrand" class="form-control" placeholder="e.g., Apple, HP, Fossil, Casio, Milton">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date Lost / Found *</label>
+                            <input type="date" id="reportDate" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Campus Facility / Location *</label>
+                        <input type="text" id="reportLocation" class="form-control" placeholder="e.g., Library 2nd Floor, CS Computer Lab B, Main Cafeteria" required>
+                        <!-- Quick Location Chips -->
+                        <div class="location-chips">
+                            <span class="loc-chip" onclick="document.getElementById('reportLocation').value='Library 2nd Floor'">Library 2nd Floor</span>
+                            <span class="loc-chip" onclick="document.getElementById('reportLocation').value='CS Computer Lab B'">CS Lab B</span>
+                            <span class="loc-chip" onclick="document.getElementById('reportLocation').value='Main Cafeteria'">Main Cafeteria</span>
+                            <span class="loc-chip" onclick="document.getElementById('reportLocation').value='Lecture Hall 102'">Lecture Hall 102</span>
+                            <span class="loc-chip" onclick="document.getElementById('reportLocation').value='Sports Complex'">Sports Complex</span>
+                            <span class="loc-chip" onclick="document.getElementById('reportLocation').value='Hostel Block C Entrance'">Hostel Block C</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Public Description *</label>
+                        <textarea id="reportDescription" class="form-control" rows="3" placeholder="Describe the physical condition, specifications, and where it was misplaced..." required></textarea>
+                        <div class="form-hint">Do not expose confidential PINs or private credentials in this public section.</div>
+                    </div>
+
+                    <!-- Private Identifying Details Panel (Secret Verification) -->
+                    <div class="secret-verification-panel" id="identifyingDetailsGroup">
+                        <div class="secret-panel-header">
+                            <i data-lucide="shield-check" style="width: 16px;"></i> Private Identifying Details (Ownership Verification)
+                        </div>
+                        <textarea id="reportIdentifying" class="form-control" rows="2" placeholder="e.g., small barcode sticker 'CS-2026' on rear lid, laser engraved initials 'A.V.', small notch scratch on pin adapter..."></textarea>
+                        <div class="form-hint" style="color: var(--brass-500); margin-top: 6px;">
+                            This secret detail is stored securely in the database and is NOT displayed publicly. It is used solely to verify ownership when someone claims your item.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Item Photo (Optional)</label>
+                        <input type="file" id="reportImageFile" class="form-control" accept="image/png, image/jpeg, image/webp">
+                        <div class="form-hint">Max file size: 5MB (JPG, PNG, WEBP).</div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                        <button type="button" class="btn btn-outline" onclick="App.navigate('home')">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="reportSubmitBtn">
+                            <i data-lucide="stamp" style="width: 14px;"></i> Publish Intake Slip
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- VIEW 5: SMART MATCHES -->
+        <!-- ---------------------------------------------------- -->
+        <section id="view-matches" class="view-section">
+            <div style="margin-bottom: 32px;">
+                <div class="section-tag" style="text-align: left;">5-Point Scoring Engine</div>
+                <h2 style="font-size: 32px; font-weight: 800; color: var(--ink-900); margin-bottom: 8px;">Algorithmic Match Suggestions</h2>
+                <p style="color: var(--ink-500); font-size: 16px;">
+                    Retrivo cross-references report categories (+30), colours (+20), campus facilities (+20), timeline proximity (+16), and keywords (+14) to identify compatible matches.
+                </p>
+            </div>
+
+            <div id="smartMatchesList">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- VIEW 6: CLAIMS & RECOVERY -->
+        <!-- ---------------------------------------------------- -->
+        <section id="view-claims" class="view-section">
+            <div style="margin-bottom: 32px;">
+                <div class="section-tag" style="text-align: left;">Ownership Verification</div>
+                <h2 style="font-size: 32px; font-weight: 800; color: var(--ink-900); margin-bottom: 8px;">Ownership Claims &amp; Handover</h2>
+                <p style="color: var(--ink-500); font-size: 16px;">Review submitted claims on found items or check verification progress on your own items.</p>
+            </div>
+
+            <div id="claimsListContainer">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- VIEW 7: ADMIN DASHBOARD (MODERATION DESK) -->
+        <!-- ---------------------------------------------------- -->
+        <section id="view-admin" class="view-section">
+            <div style="margin-bottom: 32px;">
+                <div class="section-tag" style="text-align: left;">Security &amp; Moderation Center</div>
+                <h2 style="font-size: 32px; font-weight: 800; color: var(--ink-900); margin-bottom: 8px;">Admin Property Office Desk</h2>
+                <p style="color: var(--ink-500); font-size: 16px;">Real-time database analytics, content moderation, and student account oversight.</p>
+            </div>
+
+            <!-- Admin KPIs Ledger Row (7 Key Metrics) -->
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-indigo"><i data-lucide="users" style="width: 22px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="adminStatUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-amber"><i data-lucide="search" style="width: 22px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="adminStatLost">0</div>
+                        <div class="stat-label">Lost Reports</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-teal"><i data-lucide="gift" style="width: 22px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="adminStatFound">0</div>
+                        <div class="stat-label">Found Reports</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-emerald"><i data-lucide="check-check" style="width: 22px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="adminStatRecovered">0</div>
+                        <div class="stat-label">Recoveries</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Ledger Row for Engine Performance -->
+            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 32px;">
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-amber"><i data-lucide="sparkles" style="width: 22px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="adminStatMatches">0</div>
+                        <div class="stat-label">Computed Matches</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-indigo"><i data-lucide="clock" style="width: 22px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="adminStatPendingClaims">0</div>
+                        <div class="stat-label">Pending Claims</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap stat-icon-teal"><i data-lucide="percent" style="width: 22px;"></i></div>
+                    <div>
+                        <div class="stat-value" id="adminStatRecoveryRate">0%</div>
+                        <div class="stat-label">Campus Recovery Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row (Chart.js styled with Property Office Palette) -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 36px;">
+                <div style="background: var(--paper-200); border: 1px solid var(--paper-400); border-radius: 6px; padding: 24px; box-shadow: var(--shadow-card);">
+                    <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--ink-900);">Monthly Reporting vs Recovery Trends</h4>
+                    <canvas id="chartMonthlyTrends" height="120"></canvas>
+                </div>
+                <div style="background: var(--paper-200); border: 1px solid var(--paper-400); border-radius: 6px; padding: 24px; box-shadow: var(--shadow-card);">
+                    <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--ink-900);">Reports by Category</h4>
+                    <canvas id="chartCategoryDist" height="120"></canvas>
+                </div>
+            </div>
+
+            <!-- Content Moderation Table -->
+            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 16px; color: var(--ink-900);">Campus Report Moderation</h3>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Item Name</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Reporter</th>
+                            <th>Status Override</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminItemsTableBody">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Registered Users Directory -->
+            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 16px; color: var(--ink-900);">Registered Campus Users</h3>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Role</th>
+                            <th>Registered Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminUsersTableBody">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- DBMS Viva Reference Cards Strip -->
+            <div class="dbms-reference-grid">
+                <div class="dbms-card" onclick="alert('ER Diagram & 3NF details in database/er_diagram.md and schema.sql')">
+                    <div class="dbms-card-icon"><i data-lucide="database"></i></div>
+                    <div class="dbms-card-title">ER Diagram &amp; 3NF</div>
+                    <div class="dbms-card-desc">7 normalized tables, constraints, foreign keys, and third normal form proof.</div>
+                </div>
+                <div class="dbms-card" onclick="alert('Important SQL queries in database/important_queries.sql')">
+                    <div class="dbms-card-icon"><i data-lucide="code"></i></div>
+                    <div class="dbms-card-title">Important SQL Queries</div>
+                    <div class="dbms-card-desc">Multi-table joins, subqueries, group aggregates, and stored procedures.</div>
+                </div>
+                <div class="dbms-card" onclick="alert('ACID transactions script in database/transactions.sql')">
+                    <div class="dbms-card-icon"><i data-lucide="shield"></i></div>
+                    <div class="dbms-card-title">ACID Transactions</div>
+                    <div class="dbms-card-desc">Atomic claim approval with COMMIT and conflict ROLLBACK mechanics.</div>
+                </div>
+                <div class="dbms-card" onclick="alert('4 relational views in database/views.sql')">
+                    <div class="dbms-card-icon"><i data-lucide="layout"></i></div>
+                    <div class="dbms-card-title">Relational Views</div>
+                    <div class="dbms-card-desc">vw_active_reports, vw_high_confidence_matches, and stats views.</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- 1. LOGIN MODAL -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Log In to Retrivo</h3>
+                <button class="modal-close-btn" onclick="App.closeModal('loginModal')">&times;</button>
+            </div>
+            <form onsubmit="App.handleLoginSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Campus Email Address</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="e.g., student@campus.edu" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <!-- Quick Demo Credentials for Viva presentation -->
+                    <div style="background: var(--paper-200); border: 1px solid var(--paper-400); padding: 16px; border-radius: 4px; margin-top: 16px;">
+                        <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--sepia-500); margin-bottom: 8px;">
+                            One-Click Demo Accounts (DBMS Viva):
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-sm btn-outline" onclick="App.fillDemoLogin('suyash@campus.edu', 'Student@123')">Student: Suyash</button>
+                            <button type="button" class="btn btn-sm btn-outline" onclick="App.fillDemoLogin('aarav@campus.edu', 'Student@123')">Student: Aarav</button>
+                            <button type="button" class="btn btn-sm btn-teal" onclick="App.fillDemoLogin('admin@retrivo.campus.edu', 'Admin@123')">Admin Account</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="App.closeModal('loginModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Log In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. REGISTER MODAL -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Campus Account</h3>
+                <button class="modal-close-btn" onclick="App.closeModal('registerModal')">&times;</button>
+            </div>
+            <form onsubmit="App.handleRegisterSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" id="regFullName" class="form-control" placeholder="e.g., Suyash Kaistha" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">University Email *</label>
+                        <input type="email" id="regEmail" class="form-control" placeholder="e.g., name@campus.edu" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number (Optional)</label>
+                        <input type="tel" id="regPhone" class="form-control" placeholder="+1-555-0199">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password *</label>
+                        <input type="password" id="regPassword" class="form-control" placeholder="At least 6 characters" minlength="6" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="App.closeModal('registerModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. ITEM DETAIL MODAL -->
+    <div class="modal-overlay" id="itemDetailModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Catalog Entry Details</h3>
+                <button class="modal-close-btn" onclick="App.closeModal('itemDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="itemDetailModalBody">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. CLAIM VERIFICATION MODAL -->
+    <div class="modal-overlay" id="claimModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Verify Ownership &amp; File Claim</h3>
+                <button class="modal-close-btn" onclick="App.closeModal('claimModal')">&times;</button>
+            </div>
+            <form onsubmit="App.handleClaimSubmit(event)">
+                <input type="hidden" id="claimMatchId">
+                <div class="modal-body">
+                    <div style="margin-bottom: 16px; font-size: 15px; color: var(--ink-700);">
+                        Submitting ownership claim for: <strong id="claimItemTitle" style="color: var(--ink-900);">Item</strong>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Proof of Ownership &amp; Identifying Secret Details *</label>
+                        <textarea id="claimMessageInput" class="form-control" rows="4" placeholder="Describe unique identifying marks, contents, lock screen photo, serial numbers, stickers, or scratches that prove this item belongs to you..." required></textarea>
+                        <div class="form-hint">The finder will review this statement before approving handover.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="App.closeModal('claimModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Claim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. DIRECT VERIFICATION CHAT MODAL -->
+    <div class="modal-overlay" id="claimChatModal">
+        <div class="modal-container chat-modal-container">
+            <div class="modal-header chat-modal-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="brand-icon-wrap" style="width: 36px; height: 36px; border-color: var(--moss-500); color: var(--moss-500);">
+                        <i data-lucide="message-square" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3 class="modal-title" style="margin: 0; font-size: 18px;">Property Office Direct Dispatch</h3>
+                            <span class="badge badge-pending" id="chatClaimStatusBadge">CLAIM</span>
+                        </div>
+                        <div id="chatSubtitle" style="font-family: var(--font-mono); font-size: 12px; color: var(--sepia-500); margin-top: 2px;">
+                            Chatting with: Finder · Regarding: Item Name
+                        </div>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="App.closeClaimChat()">&times;</button>
+            </div>
+
+            <div class="chat-banner-notice">
+                <i data-lucide="shield-check" style="width: 16px; height: 16px; color: var(--moss-500); flex-shrink: 0;"></i>
+                <span>Direct secure channel between claimant &amp; finder. Coordinate proof of ownership and physical pickup at the Property Office.</span>
+            </div>
+
+            <!-- Messages Stream -->
+            <div class="chat-messages-stream" id="chatMessagesStream">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Quick Verification Prompts -->
+            <div class="chat-quick-prompts-bar">
+                <span style="font-family: var(--font-ui); font-size: 11px; font-weight: 700; color: var(--ink-300); text-transform: uppercase;">Quick prompts:</span>
+                <button type="button" class="quick-prompt-btn" onclick="App.applyQuickPrompt('When can you meet at the Student Union Property Desk?')">📍 Meet at Property Desk?</button>
+                <button type="button" class="quick-prompt-btn" onclick="App.applyQuickPrompt('Are you available this afternoon around 3:30 PM?')">🕒 Available today?</button>
+                <button type="button" class="quick-prompt-btn" onclick="App.applyQuickPrompt('Can you describe any unique markings or stickers on it?')">🔍 Describe markings</button>
+                <button type="button" class="quick-prompt-btn" onclick="App.applyQuickPrompt('I have confirmed your proof of ownership, ready for handover!')">✅ Ready for handover</button>
+            </div>
+
+            <!-- Chat Input Footer -->
+            <form onsubmit="App.handleSendChatMessage(event)" class="chat-input-form">
+                <input type="text" id="chatMessageInput" class="form-control" placeholder="Type your message to coordinate handover (press Enter to send)..." autocomplete="off" required>
+                <button type="submit" class="btn btn-primary" id="btnSendChatMessage" style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <i data-lucide="send" style="width: 15px; height: 15px;"></i> Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div>
+                <div class="brand-logo" style="margin-bottom: 16px;">
+                    <div class="brand-icon-wrap" style="width: 32px; height: 32px; border-color: var(--brass-300); color: var(--brass-300); background: rgba(255, 255, 255, 0.06);">
+                        <svg class="brand-logo-svg" style="width: 18px; height: 18px;" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="16" y1="2" x2="16" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="16" y1="27" x2="16" y2="30" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="2" y1="16" x2="5" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="27" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M11.5 22.5V9.5H16.5C18.985 9.5 21 11.515 21 14C21 16.485 18.985 18.5 16.5 18.5H11.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 18.5L21.5 22.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="16" cy="14" r="1.5" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div class="brand-title" style="color: var(--paper-100); font-size: 20px;">Retrivo</div>
+                </div>
+                <p style="font-size: 14px; line-height: 22px; color: var(--paper-300); max-width: 340px;">
+                    University Property Office &amp; lost-and-found matcher. Built on Java 21 LTS, Spring Boot 3.3, and MySQL 8.0 with 3NF relational normalization and ACID verification.
+                </p>
+            </div>
+
+            <div>
+                <div class="footer-title">Platform</div>
+                <ul class="footer-links">
+                    <li><a href="#home" onclick="App.navigate('home')">Home</a></li>
+                    <li><a href="#browse" onclick="App.navigate('browse')">Card Catalog</a></li>
+                    <li><a href="#matches" onclick="App.navigate('matches')">Smart Matches</a></li>
+                    <li><a href="#claims" onclick="App.navigate('claims')">Claims</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="footer-title">Database Viva</div>
+                <ul class="footer-links">
+                    <li><a href="#admin" onclick="App.navigate('admin')">Admin Analytics</a></li>
+                    <li><a href="#" onclick="alert('Database schema is located in database/schema.sql and database/er_diagram.md')">ER Diagram &amp; 3NF</a></li>
+                    <li><a href="#" onclick="alert('Viva queries available in database/important_queries.sql')">Important SQL Queries</a></li>
+                    <li><a href="#" onclick="alert('Transactions script available in database/transactions.sql')">ACID Transactions</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="footer-title">Safety &amp; Privacy</div>
+                <p style="font-size: 13px; line-height: 20px; color: var(--paper-400);">
+                    Sensitive identifying details are encrypted and masked. Always arrange belongings handovers in well-lit public campus areas such as the Library reception desk or Campus Security office.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div>&copy; 2026 Retrivo Campus Property Office. Full-Stack DBMS Project.</div>
+            <div style="display: flex; gap: 16px;">
+                <span>Java 21 LTS</span>
+                <span>·</span>
+                <span>Spring Boot 3.3</span>
+                <span>·</span>
+                <span>MySQL 8.0</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
